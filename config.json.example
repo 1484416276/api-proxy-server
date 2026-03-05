@@ -1,0 +1,7 @@
+{
+  "proxy_port": 8080,
+  "use_https": false,
+  "admin_key": "your-admin-key-here",
+  "target_url": "https://api.openai.com",
+  "routes": {}
+}
