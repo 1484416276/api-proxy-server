@@ -1146,8 +1146,8 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
                 }
                 
                 const newModels = prompt(
-                    '添加新模型（格式：自定义名称,提供商,真实模型名称）\n' +
-                    '例如：my_glm4,zhipu_coding,glm-4\n' +
+                    '添加新模型（格式：自定义名称,提供商,真实模型名称）\\n' +
+                    '例如：my_glm4,zhipu_coding,glm-4\\n' +
                     '多个模型用分号分隔',
                     ''
                 );
