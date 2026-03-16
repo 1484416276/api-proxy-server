@@ -356,7 +356,7 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
     def handle_provider_models(self):
-        auth_header = self.headers.get('Authorization', '')
+        auth_header = self.headers.get('Authorization', '') or self.headers.get('X-Api-Key', '')
         key_config = self.get_key_config(auth_header)
         
         if not key_config:
@@ -459,7 +459,7 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
     def handle_list_models(self):
         client_ip = self.client_address[0]
         log_request(self.command, self.path, 0, "list models request", client_ip=client_ip)
-        auth_header = self.headers.get('Authorization', '')
+        auth_header = self.headers.get('Authorization', '') or self.headers.get('X-Api-Key', '')
         key_config = self.get_key_config(auth_header)
         
         if not key_config:
@@ -520,7 +520,7 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
                    client_ip=client_ip, headers=dict(self.headers), 
                    body=json.dumps(request_body) if request_body else None)
         
-        auth_header = self.headers.get('Authorization', '')
+        auth_header = self.headers.get('Authorization', '') or self.headers.get('X-Api-Key', '')
         key_config = self.get_key_config(auth_header)
         
         if not key_config:
