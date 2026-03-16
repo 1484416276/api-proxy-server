@@ -559,7 +559,10 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
             self.send_error_response(f"Base URL not configured for provider '{provider_id}'", 400)
             return
         
-        target_url = base_url.rstrip('/') + api_path + self.path.replace('/v1', '')
+        target_path = self.path.replace("/v1", "")
+        if target_path == "/messages":
+            target_path = "/chat/completions"
+        target_url = base_url.rstrip("/") + api_path + target_path
         log_request(self.command, self.path, 0, f"model={model_name} -> {target_url}", 
                    client_ip=client_ip, headers=dict(self.headers), body=json.dumps(request_body))
         
