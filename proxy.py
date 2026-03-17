@@ -559,12 +559,38 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
             self.send_error_response(f"Base URL not configured for provider '{provider_id}'", 400)
             return
         
-        target_path = self.path.replace("/v1", "")
-        if target_path == "/messages":
-            target_path = "/chat/completions"
-        target_url = base_url.rstrip("/") + api_path + target_path
+        # Check if using Anthropic-compatible endpoint
+        is_anthropic_endpoint = '/api/anthropic' in base_url
+        
+        if is_anthropic_endpoint:
+            # Anthropic endpoint: pass through directly
+            target_url = base_url.rstrip("/") + self.path
+        else:
+            # OpenAI endpoint: convert path
+            target_path = self.path.replace("/v1", "")
+            if target_path == "/messages":
+                target_path = "/chat/completions"
+            target_url = base_url.rstrip("/") + api_path + target_path
+        
         log_request(self.command, self.path, 0, f"model={model_name} -> {target_url}", 
                    client_ip=client_ip, headers=dict(self.headers), body=json.dumps(request_body))
+        
+        # Convert Anthropic tools format to OpenAI format (only for non-Anthropic endpoints)
+        if not is_anthropic_endpoint and 'tools' in request_body:
+            openai_tools = []
+            for tool in request_body['tools']:
+                if 'input_schema' in tool and 'type' not in tool:
+                    openai_tools.append({
+                        'type': 'function',
+                        'function': {
+                            'name': tool.get('name', ''),
+                            'description': tool.get('description', ''),
+                            'parameters': tool.get('input_schema', {})
+                        }
+                    })
+                else:
+                    openai_tools.append(tool)
+            request_body['tools'] = openai_tools
         
         request_body['model'] = real_model
         modified_body = json.dumps(request_body).encode('utf-8')
